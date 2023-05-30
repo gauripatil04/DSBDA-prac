@@ -1,0 +1,22 @@
+cd Documents/
+touch word_count.txt
+nano word_count.txt
+cat word_count.txt
+touch mapper.py
+nano mapper.py
+cat mapper.py
+cat word_count.txt | python3 mapper.py
+touch reducer.py
+nano reducer.py
+cat word_count.txt | python3 mapper.py | sort -k1,1 | python3 reducer.py
+start-dfs.sh
+start-yarn.sh
+hdfs dfs -mkdir /word_count_in_python
+hdfs dfs -copyFromLocal /home/purva/Documents/word_count.txt /word_count_in_python
+hdfs dfs -ls /
+hdfs dfs -ls /word_count_in_python
+chmod 777 mapper.py reducer.py
+hadoop jar /home/purva/Documents/hadoop-streaming-3.3.4.jar -input /word_count_in_python/word_count.txt -output /word_count_in_python/output2 -mapper "python3 /home/purva/Documents/mapper.py" -reducer " python3 /home/purva/Documents/reducer.py"
+hdfs dfs -cat /word_count_in_python/output2/part-00000
+
+

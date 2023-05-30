@@ -1,0 +1,23 @@
+nano SalesCountryDriver.java
+nano SalesCountryReducer.java
+nano SalesMapper.java
+mkdir lilavati
+copy log_file.txt salescountrydriver.java salescountryreducer.java salesmap (download the files first and copy into lilavati)
+(copy all the code from all three files and log.txt file too to the directory lilalvati)
+cd lilavati
+mkdir programs2
+mv log_file.txt programs2/
+javac -cp `hadoop classpath` -d programs2 SalesCountryDriver.java SalesCountryReducer.java SalesMapper.java 
+cd programs2/
+ls
+jar -cvf SalesCountry.jar -c programs2/ .
+hdfs dfs -mkdir testinput5
+hadoop fs -put log_file.txt testinput5
+hadoop fs -ls testinput5
+hadoop jar SalesCountry.jar SalesCountry.SalesCountryDriver testinput5 testoutput5
+hadoop fs -cat testoutput5/part-00000
+history
+
+
+
+

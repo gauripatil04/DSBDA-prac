@@ -1,0 +1,45 @@
+﻿import requests
+import bs4 
+
+
+var1=requests.get('https://www.flipkart.com/boat-rockerz-255-pro-258-asap-charge-upto-40-hours-playback-bluetooth-headset/p/itm9d3a2c5e5356a?pid=ACCFZ95M5JTZQH3F&lid=LSTACCFZ95M5JTZQH3FAEVZMP&marketplace=FLIPKART&q=rockerz+255+pro&store=0pm
+var1
+
+
+var1.content
+
+
+var2=bs4.BeautifulSoup(var1.text)
+
+
+overall=var2.find(‘div’,{‘class’:’_2d4LTz’}).get_text()
+overall
+
+
+o_rating=var2.find(‘div’,{‘class’:’_2d4LTz’}).get_text()
+o_rating
+
+
+i_rating=var2.find_all(‘div’,{‘class’:’_3LWZlk _1BLPMq’})
+for irating in i_rating:
+print(irating.get_text()+’\n’)
+
+
+r=var2.find_all(‘div’,{‘class’:’t-ZTKy’})
+for rv in r:
+        print(rv.get_text()+’\n’)
+
+
+reviews=var2.find_all(‘div’,{‘class’:’t-ZTKy’})
+for all_reviews in reviews:
+        print(all_reviews.get_text()+’\n’)
+
+
+cname=var2.find_all(‘p’,{‘class’:’_2sc7ZR _2V5EHH’})
+for names in cname:
+        print(names.get_text()+’\n’)
+
+
+cust_names=var2.find_all(‘p’,{‘class’:’_2sc7ZR _2V5EHH’})
+for c_names in cust_names:
+        print(c_names.get_text()+’\n’)

@@ -1,0 +1,35 @@
+import pandas as pd
+
+df = pd.read_csv (r'C:\Users\Purva\Downloads\facebookdata.csv',sep=";") 
+
+df.describe
+
+df.shape
+
+sub1 = df[['Page total likes', 'Type', 'Category', 'Post Month', 'Post Weekday']].loc[0:15]
+
+sub2 = df[['Lifetime Post reach by people who like your Page', 'Lifetime People who have liked your Page and engaged with your post']].loc[16:30] 
+
+sub1.shape
+
+sub2.shape
+
+sub3=pd.concat([sub1,sub2]) #concatinate two subsets
+
+sub3.shape 
+
+sub4=sub3.sort_values(by='Type',ascending=True) #sort type column in ascending 
+
+sub4
+
+sub4.shape
+
+sub5=sub4.transpose() #transpose row to column
+
+sub5.shape
+
+sub6=pd.pivot_table(sub4,index='Type') #optimization of data,increase the performace
+
+sub6
+
+sub6.shape

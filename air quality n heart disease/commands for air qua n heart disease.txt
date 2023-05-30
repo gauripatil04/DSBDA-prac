@@ -1,0 +1,148 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+air = pd.read_csv(r"C:\Users\Purva\Downloads\AirQuality.csv",sep=';')
+heart = pd.read_csv(r"C:\Users\Purva\Downloads\heart.csv")
+
+air.head()
+
+heart.head()
+
+air.info()
+
+#Dropping CO(GT) and Unnamed columns
+air.drop(['CO(GT)','Unnamed: 15','Unnamed: 16'],axis = 1,inplace = True)
+
+air.sample(5)
+
+air.shape
+
+air.isnull().sum()
+
+air.dropna(inplace=True)
+
+air.shape
+
+#Formatting some object columns from strings to floats
+
+air.replace(to_replace=',',value='.',regex=True,inplace=True) 
+cols=['C6H6(GT)', 'T', 'RH', 'AH']
+for i in cols:
+    air[i] = pd.to_numeric(air[i],errors='coerce')
+
+heart.shape
+
+heart.duplicated().sum()
+
+heart.drop_duplicates(inplace=True)
+heart.shape
+
+#Replacing -200 to NaN 
+air.replace(to_replace=-200,value=np.nan,inplace=True)
+
+air.sample(5)
+
+air.isnull().sum()
+
+NMHC_ratio = air['NMHC(GT)'].isna().sum()/len(air['NMHC(GT)'])
+print('The NMHC(GT) sensor has {:.2f}% of missing data.'.format(NMHC_ratio*100))
+#Removing NMHC(GT) sensor due to amount of null values
+air.drop('NMHC(GT)', axis=1, inplace=True) 
+
+#Formatting Date and Time to datetime type
+air['Date'] = pd.to_datetime(air['Date'],dayfirst=True) 
+air['Time'] = pd.to_datetime(air['Time'],format= '%H.%M.%S' ).dt.time
+
+air.head()
+
+new_sex=pd.get_dummies(data=heart['sex'],prefix='sex')
+new_sex.head()
+
+new_cp=pd.get_dummies(heart['cp'],prefix='chestPain')
+new_cp.head()
+
+new_exang=pd.get_dummies(heart['exang'],prefix='exang')
+new_exang.head()
+
+new_slope=pd.get_dummies(heart['slope'],prefix='slope')
+new_slope.head()
+
+new_thal=pd.get_dummies(heart['thal'],prefix='thal')
+new_thal.head()
+
+new_ca=pd.get_dummies(heart['ca'],prefix='ca')
+new_ca.head()
+
+# Merge Dataframes
+heart_new=pd.concat([heart,new_sex,new_cp,new_ca,new_thal,new_exang,new_slope],axis=1)
+
+heart_new.drop(['sex','cp','thal','exang','ca','slope'],axis=1,inplace=True)
+heart_new.head()
+
+from sklearn.preprocessing import StandardScaler
+sc=StandardScaler()
+
+X=heart_new.drop('target',axis=1)
+Y=heart_new['target']
+
+X_scaled = sc.fit_transform(X)
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, Y, test_size = 0.2, random_state = 42)
+print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
+
+#Logistic Regression
+from sklearn.linear_model import LogisticRegression
+logreg = LogisticRegression()
+logreg.fit(X_train,y_train)
+print("Logistic Regression train score : {:.4f}".format(logreg.score(X_train, y_train)))
+print("Logistic Regression test score : {:.4f}".format(logreg.score(X_test, y_test)))
+
+#Decision Tree
+from sklearn.tree import DecisionTreeClassifier
+tree = DecisionTreeClassifier(max_depth=8, random_state=0)
+tree.fit(X_train, y_train)
+print("Decision Tree train score : {:.4f}".format(tree.score(X_train, y_train)))
+print("Decision Tree test score : {:.4f}".format(tree.score(X_test, y_test)))
+
+pred_logreg = logreg.predict(X_test)
+pred_tree = tree.predict(X_test)
+
+from sklearn.metrics import confusion_matrix
+cm_logreg = confusion_matrix(y_test, pred_logreg)
+cm_tree = confusion_matrix(y_test, pred_tree)
+
+plt.subplot(1,5,2)
+plt.title("Logistic Regression")
+sns.heatmap(cm_logreg, annot=True, cmap="Reds", fmt="d", cbar=False, annot_kws={"size": 12})
+
+plt.subplot(1,5,5)
+plt.title("Decision Tree")
+sns.heatmap(cm_tree, annot=True, cmap="Reds", fmt="d", cbar=False, annot_kws={"size": 12})
+plt.show()
+
+air.isna().sum()
+
+air.drop(columns=['NO2(GT)','NOx(GT)'],inplace=True)
+
+air.dropna(inplace=True)
+
+#Creating a Regression Model of the PT08.S1 sensor:
+
+Y = air['PT08.S1(CO)'] 
+X = air.drop(['PT08.S1(CO)','Date', 'Time'], axis=1)
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+print(X_train.shape, X_test.shape)
+
+from sklearn.ensemble import RandomForestRegressor
+model_randomforest = RandomForestRegressor(n_estimators=100)
+model_randomforest.fit(X_train, Y_train)
+
+#Evaluating the results with the R² metric
+#Test data evaluation
+from sklearn import metrics
+pred_randomforest = model_randomforest.predict(X_test) #predicted CO concentrations
+print('Random Forest Regression Model: R²={:.2f}'.format(metrics.r2_score(Y_test, pred_randomforest)))
+
